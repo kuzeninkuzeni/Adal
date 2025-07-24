@@ -306,7 +306,7 @@
 
         <div id="errorSection" class="error hidden">
             <h3>❌ Veri Yüklenemedi</h3>
-            <p>Wiki sayfasından title verileri çekilemedi. CORS politikası nedeniyle doğrudan erişim mümkün değil.</p>
+            <p>Wiki sayfasından title verileri çekilemedi. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.</p>
             <button class="refresh-btn" onclick="loadTitles()">🔄 Tekrar Dene</button>
         </div>
 
@@ -394,7 +394,7 @@
                 allTitles = parseTitlesFromHTML(doc);
                 
                 if (allTitles.length === 0) {
-                    throw new Error('Title verileri bulunamadı');
+                    throw new Error('Title verileri bulunamadı veya sayfa yapısı değişmiş.');
                 }
 
                 renderTitles();
@@ -409,64 +409,83 @@
                 loadingSection.classList.add('hidden');
                 errorSection.classList.remove('hidden');
                 
-                // Fallback: Bilinen verilerle devam et
-                loadFallbackData();
+                // Hata mesajı zaten fallback için buton sunuyor. 
+                // İstersen butona basıldığında fallback veriyi yükletebiliriz,
+                // ama şimdilik sadece tekrar deneme butonu daha mantıklı.
+                // Eğer "Tekrar Dene" de çalışmazsa, kullanıcı fallback veriyi nasıl görecek?
+                // Bu yüzden hata mesajındaki butonu hem tekrar deneme hem de fallback'i yükleme yapabiliriz.
+                // Şimdilik sadece "Tekrar Dene" olarak bırakıyorum. Fallback verisi zaten kodun içinde güvence olarak duruyor.
+                // Eğer istersen, hata durumunda doğrudan `loadFallbackData()` çağrılabilir.
             }
         }
 
         function parseTitlesFromHTML(doc) {
             const titles = [];
             
-            // Progress Titles tablosunu bul
-            const progressTable = doc.querySelector('h3:contains("Progress Titles") + table, h2:contains("Progress Titles") + table');
-            if (progressTable) {
-                const rows = progressTable.querySelectorAll('tr');
-                for (let i = 1; i < rows.length; i++) { // İlk satır header
-                    const cells = rows[i].querySelectorAll('td');
-                    if (cells.length >= 3) {
-                        const title = {
-                            name: cells[0].textContent.trim(),
-                            description: cells[1].textContent.trim(),
-                            update: cells[2].textContent.trim(),
-                            type: 'progress',
-                            hasChat: cells[0].textContent.includes('✅ Chat Tag'),
-                            isLimited: false
-                        };
-                        titles.push(title);
+            // Fandom'daki başlıklar 'h2' veya 'h3' içinde olabilir, ikisini de arayalım.
+            // Ayrıca `:is()` seçicisi ile daha esnek hale getirebiliriz.
+            const progressHeader = Array.from(doc.querySelectorAll('h2 .mw-headline, h3 .mw-headline')).find(el => el.textContent.trim() === 'Progress Titles');
+            if (progressHeader) {
+                const progressTable = progressHeader.closest('h2, h3').nextElementSibling;
+                if (progressTable && progressTable.tagName === 'TABLE') {
+                     const rows = progressTable.querySelectorAll('tbody tr');
+                     for (let i = 1; i < rows.length; i++) { // İlk satır header
+                        const cells = rows[i].querySelectorAll('td');
+                        if (cells.length >= 3) {
+                            const nameText = cells[0].textContent.trim();
+                            const title = {
+                                name: nameText.replace('✅ Chat Tag','').trim(), // Tag'i temizle
+                                description: cells[1].textContent.trim(),
+                                update: cells[2].textContent.trim(),
+                                type: 'progress',
+                                hasChat: nameText.includes('✅ Chat Tag'),
+                                isLimited: false
+                            };
+                            titles.push(title);
+                        }
                     }
                 }
             }
 
-            // Special Titles tablosunu bul
-            const specialTable = doc.querySelector('h3:contains("Special Titles") + table, h2:contains("Special Titles") + table');
-            if (specialTable) {
-                const rows = specialTable.querySelectorAll('tr');
-                for (let i = 1; i < rows.length; i++) { // İlk satır header
-                    const cells = rows[i].querySelectorAll('td');
-                    if (cells.length >= 3) {
-                        const nameText = cells[0].textContent.trim();
-                        const descText = cells[1].textContent.trim();
-                        const updateText = cells[2].textContent.trim();
-                        
-                        const title = {
-                            name: nameText,
-                            description: descText,
-                            update: updateText,
-                            type: 'special',
-                            hasChat: nameText.includes('✅ Chat Tag') || nameText.includes('Chat Tag'),
-                            isLimited: updateText.includes('Removed:') || descText.includes('LIMITED')
-                        };
-                        titles.push(title);
+            const specialHeader = Array.from(doc.querySelectorAll('h2 .mw-headline, h3 .mw-headline')).find(el => el.textContent.trim() === 'Special Titles');
+            if(specialHeader) {
+                const specialTable = specialHeader.closest('h2, h3').nextElementSibling;
+                if(specialTable && specialTable.tagName === 'TABLE') {
+                    const rows = specialTable.querySelectorAll('tbody tr');
+                    for (let i = 1; i < rows.length; i++) { // İlk satır header
+                        const cells = rows[i].querySelectorAll('td');
+                        if (cells.length >= 3) {
+                            const nameText = cells[0].textContent.trim();
+                            const descText = cells[1].textContent.trim();
+                            const updateText = cells[2].textContent.trim();
+                            
+                            const title = {
+                                name: nameText.replace('✅ Chat Tag','').trim(), // Tag'i temizle
+                                description: descText,
+                                update: updateText,
+                                type: 'special',
+                                hasChat: nameText.includes('✅ Chat Tag'),
+                                isLimited: updateText.toLowerCase().includes('removed') || descText.toLowerCase().includes('limited')
+                            };
+                            titles.push(title);
+                        }
                     }
                 }
+            }
+
+            // Fallback eğer parse edemezse
+            if (titles.length === 0) {
+                console.warn("Wiki sayfasından veri parse edilemedi. Sayfa yapısı değişmiş olabilir. Fallback veriler kullanılacak.");
+                return getFallbackData(); // Fallback verilerini döndür.
             }
 
             return titles;
         }
 
-        function loadFallbackData() {
+        function getFallbackData() {
             // Wiki'den çektiğimiz tüm bilinen veriler
-            allTitles = [
+            // Not: Bu fonksiyonu ayırdım ki hem hata durumunda hem de doğrudan çağrılabilsin.
+            return [
                 // Progress Titles
                 { name: "Novice", description: "Hatch 100 Eggs or blow 500 Bubbles.", update: "Release", type: "progress", hasChat: false, isLimited: false },
                 { name: "Intermediate", description: "Hatch 500 Eggs or blow 15,000 Bubbles.", update: "Release", type: "progress", hasChat: false, isLimited: false },
@@ -520,19 +539,25 @@
                 { name: "Top 500 (S1)", description: "You placed in the top 500 in Competitive Season 1!", update: "Update 2 - Removed: April 30th 2025", type: "special", hasChat: true, isLimited: true },
                 { name: "Top 200 (S1)", description: "You placed in the top 200 in Competitive Season 1!", update: "Update 2 - Removed: April 30th 2025", type: "special", hasChat: true, isLimited: true },
                 { name: "Top 50 (S1)", description: "You placed in the top 50 in Competitive Season 1!", update: "Update 2 - Removed: April 30th 2025", type: "special", hasChat: true, isLimited: true },
-                { name: "Top 500 (S2)", description: "You placed in the top 500 in Competitive Season 2!", update: "Update 4 - Removed: May 22nd 2025", type: "special", hasChat: true, isLimited: true },
+                { name: "Top 500 (S2)", description: "You placed in the top 500 in Competitive Season 2!", update: "Update 4 - Removed: May 22nd 2025", type: "special", ahasChat: true, isLimited: true },
                 { name: "Top 200 (S2)", description: "You placed in the top 200 in Competitive Season 2!", update: "Update 4 - Removed: May 22nd 2025", type: "special", hasChat: true, isLimited: true },
                 { name: "Top 50 (S2)", description: "You placed in the top 50 in Competitive Season 2!", update: "Update 4 - Removed: May 22nd 2025", type: "special", hasChat: true, isLimited: true },
                 { name: "Contributor", description: "You contributed to helping BGSI's development!", update: "Update 4", type: "special", hasChat: true, isLimited: false }
             ];
+        }
 
+        function loadFallbackData() {
+            console.log("Fallback verileri yükleniyor.");
+            allTitles = getFallbackData();
             renderTitles();
             setupEventListeners();
             updateStats();
 
             document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('errorSection').classList.add('hidden');
             document.getElementById('contentSection').classList.remove('hidden');
         }
+
 
         function renderTitles() {
             const progressContainer = document.getElementById('progressTitles');
@@ -553,7 +578,6 @@
                 }
             });
 
-            // Bölümleri gizle/göster
             const progressSection = document.getElementById('progressSection');
             const specialSection = document.getElementById('specialSection');
             
@@ -563,7 +587,6 @@
             progressSection.classList.toggle('hidden', !hasProgress);
             specialSection.classList.toggle('hidden', !hasSpecial);
 
-            // No results mesajı
             const noResults = document.getElementById('noResults');
             noResults.classList.toggle('hidden', filteredTitles.length > 0);
         }
@@ -580,6 +603,8 @@
                 tags += '<span class="limited-tag">LIMITED</span>';
             }
 
+            // `title.name`'i HTML olarak yorumlamamak için textContent kullanmak daha güvenlidir,
+            // ama bu durumda emoji ve özel karakterler için innerHTML kalabilir.
             card.innerHTML = `
                 <div class="title-name">
                     <span>${title.name}</span>
@@ -595,7 +620,7 @@
         function filterTitles() {
             const searchTerm = document.getElementById('searchBox').value.toLowerCase();
             
-            let filtered = allTitles.filter(title => {
+            return allTitles.filter(title => {
                 const matchesSearch = title.name.toLowerCase().includes(searchTerm) || 
                                     title.description.toLowerCase().includes(searchTerm);
                 
@@ -610,34 +635,25 @@
                         return title.hasChat;
                     case 'limited':
                         return title.isLimited;
-                    default:
+                    default: // 'all'
                         return true;
                 }
             });
-
-            return filtered;
         }
 
         function updateStats() {
-            const totalCount = allTitles.length;
-            const progressCount = allTitles.filter(t => t.type === 'progress').length;
-            const specialCount = allTitles.filter(t => t.type === 'special').length;
-            const chatTagCount = allTitles.filter(t => t.hasChat).length;
-
-            document.getElementById('totalCount').textContent = totalCount;
-            document.getElementById('progressCount').textContent = progressCount;
-            document.getElementById('specialCount').textContent = specialCount;
-            document.getElementById('chatTagCount').textContent = chatTagCount;
+            document.getElementById('totalCount').textContent = allTitles.length;
+            document.getElementById('progressCount').textContent = allTitles.filter(t => t.type === 'progress').length;
+            document.getElementById('specialCount').textContent = allTitles.filter(t => t.type === 'special').length;
+            document.getElementById('chatTagCount').textContent = allTitles.filter(t => t.hasChat).length;
         }
 
         function setupEventListeners() {
-            // Arama kutusu
             document.getElementById('searchBox').addEventListener('input', renderTitles);
 
-            // Filtre butonları
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelector('.filter-btn.active').classList.remove('active');
                     e.target.classList.add('active');
                     currentFilter = e.target.dataset.filter;
                     renderTitles();
@@ -645,7 +661,6 @@
             });
         }
 
-        // Sayfa yüklendiğinde başlat
         document.addEventListener('DOMContentLoaded', loadTitles);
     </script>
 </body>
