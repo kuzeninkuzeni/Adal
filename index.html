@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BGS Infinity - Titles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 50px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .search-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+        }
+
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: rgba(255,255,255,0.4);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .titles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .title-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid #667eea;
+        }
+
+        .title-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .title-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .chat-tag {
+            background: #4CAF50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: normal;
+        }
+
+        .limited-tag {
+            background: #FF5722;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: normal;
+        }
+
+        .title-description {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .title-update {
+            background: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #555;
+            font-style: italic;
+        }
+
+        .progress-titles {
+            border-left-color: #4CAF50;
+        }
+
+        .special-titles {
+            border-left-color: #FF9800;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .error {
+            background: rgba(255,0,0,0.1);
+            border: 2px solid rgba(255,0,0,0.3);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .refresh-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .no-results {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            margin: 40px 0;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                gap: 15px;
+            }
+            
+            .titles-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-buttons {
+                gap: 10px;
+            }
+            
+            .filter-btn {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 BGS Infinity Titles</h1>
+            <p>Bubble Gum Simulator INFINITY - Canlı Title Verisi</p>
+        </div>
+
+        <div id="loadingSection" class="loading">
+            <div class="spinner"></div>
+            <p>Wiki'den title verileri çekiliyor...</p>
+        </div>
+
+        <div id="errorSection" class="error hidden">
+            <h3>❌ Veri Yüklenemedi</h3>
+            <p>Wiki sayfasından title verileri çekilemedi. CORS politikası nedeniyle doğrudan erişim mümkün değil.</p>
+            <button class="refresh-btn" onclick="loadTitles()">🔄 Tekrar Dene</button>
+        </div>
+
+        <div id="contentSection" class="hidden">
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="totalCount">0</span>
+                    <span class="stat-label">Toplam Başlık</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="progressCount">0</span>
+                    <span class="stat-label">İlerleme Başlıkları</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="specialCount">0</span>
+                    <span class="stat-label">Özel Başlıklar</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="chatTagCount">0</span>
+                    <span class="stat-label">Chat Tag'li</span>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="searchBox" class="search-box" placeholder="Başlık ara... (örn: Bubble, Hatcher, VIP)">
+            </div>
+
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">Tümü</button>
+                <button class="filter-btn" data-filter="progress">İlerleme Başlıkları</button>
+                <button class="filter-btn" data-filter="special">Özel Başlıklar</button>
+                <button class="filter-btn" data-filter="chat-tag">Chat Tag'li</button>
+                <button class="filter-btn" data-filter="limited">Sınırlı/Kaldırılmış</button>
+            </div>
+
+            <div class="no-results hidden" id="noResults">
+                🔍 Aradığınız kriterlere uygun başlık bulunamadı.
+            </div>
+
+            <div class="section" id="progressSection">
+                <div class="section-title">📈 İlerleme Başlıkları</div>
+                <div class="titles-grid" id="progressTitles"></div>
+            </div>
+
+            <div class="section" id="specialSection">
+                <div class="section-title">⭐ Özel Başlıklar</div>
+                <div class="titles-grid" id="specialTitles"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allTitles = [];
+        let currentFilter = 'all';
+
+        // Wiki URL'si
+        const WIKI_URL = 'https://bgs-infinity.fandom.com/wiki/Titles?so=search';
+
+        async function loadTitles() {
+            const loadingSection = document.getElementById('loadingSection');
+            const errorSection = document.getElementById('errorSection');
+            const contentSection = document.getElementById('contentSection');
+
+            loadingSection.classList.remove('hidden');
+            errorSection.classList.add('hidden');
+            contentSection.classList.add('hidden');
+
+            try {
+                // CORS proxy kullanarak veri çekmeyi dene
+                const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(WIKI_URL);
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error('Veri çekilemedi');
+                }
+
+                const data = await response.json();
+                const htmlContent = data.contents;
+                
+                // HTML içeriğini parse et
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+                
+                // Title verilerini çıkar
+                allTitles = parseTitlesFromHTML(doc);
+                
+                if (allTitles.length === 0) {
+                    throw new Error('Title verileri bulunamadı');
+                }
+
+                renderTitles();
+                setupEventListeners();
+                updateStats();
+
+                loadingSection.classList.add('hidden');
+                contentSection.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Veri yükleme hatası:', error);
+                loadingSection.classList.add('hidden');
+                errorSection.classList.remove('hidden');
+                
+                // Fallback: Bilinen verilerle devam et
+                loadFallbackData();
+            }
+        }
+
+        function parseTitlesFromHTML(doc) {
+            const titles = [];
+            
+            // Progress Titles tablosunu bul
+            const progressTable = doc.querySelector('h3:contains("Progress Titles") + table, h2:contains("Progress Titles") + table');
+            if (progressTable) {
+                const rows = progressTable.querySelectorAll('tr');
+                for (let i = 1; i < rows.length; i++) { // İlk satır header
+                    const cells = rows[i].querySelectorAll('td');
+                    if (cells.length >= 3) {
+                        const title = {
+                            name: cells[0].textContent.trim(),
+                            description: cells[1].textContent.trim(),
+                            update: cells[2].textContent.trim(),
+                            type: 'progress',
+                            hasChat: cells[0].textContent.includes('✅ Chat Tag'),
+                            isLimited: false
+                        };
+                        titles.push(title);
+                    }
+                }
+            }
+
+            // Special Titles tablosunu bul
+            const specialTable = doc.querySelector('h3:contains("Special Titles") + table, h2:contains("Special Titles") + table');
+            if (specialTable) {
+                const rows = specialTable.querySelectorAll('tr');
+                for (let i = 1; i < rows.length; i++) { // İlk satır header
+                    const cells = rows[i].querySelectorAll('td');
+                    if (cells.length >= 3) {
+                        const nameText = cells[0].textContent.trim();
+                        const descText = cells[1].textContent.trim();
+                        const updateText = cells[2].textContent.trim();
+                        
+                        const title = {
+                            name: nameText,
+                            description: descText,
+                            update: updateText,
+                            type: 'special',
+                            hasChat: nameText.includes('✅ Chat Tag') || nameText.includes('Chat Tag'),
+                            isLimited: updateText.includes('Removed:') || descText.includes('LIMITED')
+                        };
+                        titles.push(title);
+                    }
+                }
+            }
+
+            return titles;
+        }
+
+        function loadFallbackData() {
+            // Wiki'den çektiğimiz tüm bilinen veriler
+            allTitles = [
+                // Progress Titles
+                { name: "Novice", description: "Hatch 100 Eggs or blow 500 Bubbles.", update: "Release", type: "progress", hasChat: false, isLimited: false },
+                { name: "Intermediate", description: "Hatch 500 Eggs or blow 15,000 Bubbles.", update: "Release", type: "progress", hasChat: false, isLimited: false },
+                { name: "Expert", description: "Hatch 2,500 Eggs or blow 50,000 Bubbles.", update: "Release", type: "progress", hasChat: false, isLimited: false },
+                { name: "Extreme", description: "Hatch 10,000 Eggs or blow 250,000 Bubbles.", update: "Release", type: "progress", hasChat: false, isLimited: false },
+                { name: "Unreal Bubbler", description: "Blow 1,000,000 Bubbles.", update: "Release", type: "progress", hasChat: false, isLimited: false },
+                { name: "Bubble Master", description: "Blow 100,000,000 Bubbles.", update: "Release", type: "progress", hasChat: false, isLimited: false },
+                { name: "Godly Bubbler", description: "Blow 1,000,000,000 Bubbles.", update: "Release", type: "progress", hasChat: true, isLimited: false },
+                { name: "Unreal Hatcher", description: "Hatch 20,000 Eggs.", update: "Release", type: "progress", hasChat: false, isLimited: false },
+                { name: "Egg Master", description: "Hatch 50,000 Eggs.", update: "Release", type: "progress", hasChat: false, isLimited: false },
+                { name: "Godly Hatcher", description: "Hatch 250,000 Eggs.", update: "Release", type: "progress", hasChat: false, isLimited: false },
+                { name: "Eggcellent", description: "Hatch 1,000,000 Eggs.", update: "Release", type: "progress", hasChat: false, isLimited: false },
+                { name: "No Life", description: "Hatch 5,000,000 Eggs.", update: "Release", type: "progress", hasChat: true, isLimited: false },
+                
+                // Special Titles - Tüm 42 title
+                { name: "👑 VIP", description: "Purchase the VIP Gamepass.", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "💰 Money Bags 💰", description: "Own every gamepass in the game.", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "One In A Million", description: "Hatch a Secret Pet.", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "Keeper of Secrets", description: "Hatch 3 different Secret Pets.", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "Ultimate Collector", description: "Hatch 8 different Secret Pets.", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "Secret Whisperer", description: "Hatch 15 different Secret Pets.", update: "Update 13", type: "special", hasChat: true, isLimited: false },
+                { name: "Shiny Hunter", description: "Make/Hatch a shiny Secret Pet.", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "Colossus", description: "Hatch a Mythic Secret Pet.", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "Colossal Inferno", description: "Hatch 3 Mythic Secret Pets.", update: "Update 13", type: "special", hasChat: true, isLimited: false },
+                { name: "Brightest Star", description: "Hatch a Shiny Mythic Secret Pet.", update: "Update 13", type: "special", hasChat: true, isLimited: false },
+                { name: "Deja Vu", description: "Hatch the same Secret Pet, twice!", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "Over 9000", description: "Hatch an Infinity Pet.", update: "Update 13", type: "special", hasChat: true, isLimited: false },
+                { name: "Breaker of Limits", description: "Hatch a Mythic Infinity Pet.", update: "Update 13", type: "special", hasChat: true, isLimited: false },
+                { name: "Frequent Visitor", description: "Login 7 days in a row!", update: "Update 13", type: "special", hasChat: true, isLimited: false },
+                { name: "Dedicated", description: "Login 14 days in a row!", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "∞Infinity∞", description: "Login 30 days in a row!", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "Obscurity", description: "Login 100 days in a row!", update: "Update 13", type: "special", hasChat: true, isLimited: false },
+                { name: "OG Bubbler", description: "You played Bubble Gum Simulator since 2018! You're a true OG 😎", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "2019 Bubbler", description: "You played Bubble Gum Simulator since 2019 or earlier!", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "2020 Bubbler", description: "You played Bubble Gum Simulator since 2020 or earlier!", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "Bubble Overlord", description: "You reached the Platinum milestone of Bubbling!", update: "Update 11", type: "special", hasChat: true, isLimited: false },
+                { name: "Eternal Hatcher", description: "You reached the Platinum milestone of Hatching!", update: "Update 11", type: "special", hasChat: true, isLimited: false },
+                { name: "🏆 Global Bubbler 🏆", description: "You're currently on the Bubble Leaderboard!", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "🏆 Global Hatcher 🏆", description: "You're currently on the Hatching Leaderboard!", update: "Release", type: "special", hasChat: true, isLimited: false },
+                { name: "Master of Gems", description: "You reached the Platinum milestone of Gem Genie!", update: "Update 11", type: "special", hasChat: true, isLimited: false },
+                { name: "🐰 Easter Competitor", description: "You completed the 2025 Egg Hunt!", update: "Update 1 - Removed: Update 2", type: "special", hasChat: true, isLimited: true },
+                { name: "Timewalker", description: "You reached the Platinum milestone of Playtime!", update: "Update 11", type: "special", hasChat: true, isLimited: false },
+                { name: "Artisan", description: "You reached the Platinum milestone of Enchanting!", update: "Update 11", type: "special", hasChat: true, isLimited: false },
+                { name: "❓ Riddler ❓", description: "You placed in the top 250 in the 2025 Egg Hunt!", update: "Update 1 - Removed: Update 2", type: "special", hasChat: true, isLimited: true },
+                { name: "🎲GAMER🎲", description: "A rare title earned from the Minigame Board!", update: "Update 3", type: "special", hasChat: true, isLimited: false },
+                { name: "Gamebreaker", description: "You reached the Platinum milestone of Minigames!", update: "Update 11", type: "special", hasChat: true, isLimited: false },
+                { name: "Nerd", description: "Win 10 games of Guess That Pet!", update: "Update 3.5", type: "special", hasChat: true, isLimited: false },
+                { name: "💎Archeologist", description: "You discovered all of the artifacts in the Beach Festival!", update: "Update 5 - Removed: Update 8", type: "special", hasChat: true, isLimited: true },
+                { name: "🗿", description: "You discovered all of the Ancient artifacts in the Beach Festival!", update: "Update 6 - Removed: Update 8", type: "special", hasChat: true, isLimited: true },
+                { name: "BRUH", description: "You completed all of Bruhliens quests during the Bruh Invasion!", update: "Update 9 - Removed: July 7th 2025", type: "special", hasChat: true, isLimited: true },
+                { name: "Top 500 (S1)", description: "You placed in the top 500 in Competitive Season 1!", update: "Update 2 - Removed: April 30th 2025", type: "special", hasChat: true, isLimited: true },
+                { name: "Top 200 (S1)", description: "You placed in the top 200 in Competitive Season 1!", update: "Update 2 - Removed: April 30th 2025", type: "special", hasChat: true, isLimited: true },
+                { name: "Top 50 (S1)", description: "You placed in the top 50 in Competitive Season 1!", update: "Update 2 - Removed: April 30th 2025", type: "special", hasChat: true, isLimited: true },
+                { name: "Top 500 (S2)", description: "You placed in the top 500 in Competitive Season 2!", update: "Update 4 - Removed: May 22nd 2025", type: "special", hasChat: true, isLimited: true },
+                { name: "Top 200 (S2)", description: "You placed in the top 200 in Competitive Season 2!", update: "Update 4 - Removed: May 22nd 2025", type: "special", hasChat: true, isLimited: true },
+                { name: "Top 50 (S2)", description: "You placed in the top 50 in Competitive Season 2!", update: "Update 4 - Removed: May 22nd 2025", type: "special", hasChat: true, isLimited: true },
+                { name: "Contributor", description: "You contributed to helping BGSI's development!", update: "Update 4", type: "special", hasChat: true, isLimited: false }
+            ];
+
+            renderTitles();
+            setupEventListeners();
+            updateStats();
+
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('contentSection').classList.remove('hidden');
+        }
+
+        function renderTitles() {
+            const progressContainer = document.getElementById('progressTitles');
+            const specialContainer = document.getElementById('specialTitles');
+            
+            progressContainer.innerHTML = '';
+            specialContainer.innerHTML = '';
+
+            const filteredTitles = filterTitles();
+
+            filteredTitles.forEach(title => {
+                const titleCard = createTitleCard(title);
+                
+                if (title.type === 'progress') {
+                    progressContainer.appendChild(titleCard);
+                } else {
+                    specialContainer.appendChild(titleCard);
+                }
+            });
+
+            // Bölümleri gizle/göster
+            const progressSection = document.getElementById('progressSection');
+            const specialSection = document.getElementById('specialSection');
+            
+            const hasProgress = filteredTitles.some(t => t.type === 'progress');
+            const hasSpecial = filteredTitles.some(t => t.type === 'special');
+            
+            progressSection.classList.toggle('hidden', !hasProgress);
+            specialSection.classList.toggle('hidden', !hasSpecial);
+
+            // No results mesajı
+            const noResults = document.getElementById('noResults');
+            noResults.classList.toggle('hidden', filteredTitles.length > 0);
+        }
+
+        function createTitleCard(title) {
+            const card = document.createElement('div');
+            card.className = `title-card ${title.type}-titles`;
+            
+            let tags = '';
+            if (title.hasChat) {
+                tags += '<span class="chat-tag">✅ Chat Tag</span>';
+            }
+            if (title.isLimited) {
+                tags += '<span class="limited-tag">LIMITED</span>';
+            }
+
+            card.innerHTML = `
+                <div class="title-name">
+                    <span>${title.name}</span>
+                    ${tags}
+                </div>
+                <div class="title-description">${title.description}</div>
+                <div class="title-update">Güncelleme: ${title.update}</div>
+            `;
+
+            return card;
+        }
+
+        function filterTitles() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            
+            let filtered = allTitles.filter(title => {
+                const matchesSearch = title.name.toLowerCase().includes(searchTerm) || 
+                                    title.description.toLowerCase().includes(searchTerm);
+                
+                if (!matchesSearch) return false;
+
+                switch (currentFilter) {
+                    case 'progress':
+                        return title.type === 'progress';
+                    case 'special':
+                        return title.type === 'special';
+                    case 'chat-tag':
+                        return title.hasChat;
+                    case 'limited':
+                        return title.isLimited;
+                    default:
+                        return true;
+                }
+            });
+
+            return filtered;
+        }
+
+        function updateStats() {
+            const totalCount = allTitles.length;
+            const progressCount = allTitles.filter(t => t.type === 'progress').length;
+            const specialCount = allTitles.filter(t => t.type === 'special').length;
+            const chatTagCount = allTitles.filter(t => t.hasChat).length;
+
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('progressCount').textContent = progressCount;
+            document.getElementById('specialCount').textContent = specialCount;
+            document.getElementById('chatTagCount').textContent = chatTagCount;
+        }
+
+        function setupEventListeners() {
+            // Arama kutusu
+            document.getElementById('searchBox').addEventListener('input', renderTitles);
+
+            // Filtre butonları
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentFilter = e.target.dataset.filter;
+                    renderTitles();
+                });
+            });
+        }
+
+        // Sayfa yüklendiğinde başlat
+        document.addEventListener('DOMContentLoaded', loadTitles);
+    </script>
+</body>
+</html>
